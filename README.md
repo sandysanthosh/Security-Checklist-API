@@ -1,67 +1,75 @@
-# Security-Checklist-API
+[繁中版](./README-tw.md) | [简中版](./README-zh.md) | [Português (Brasil)](./README-pt_BR.md) | [Français](./README-fr.md) | [한국어](./README-ko.md) | [Nederlands](./README-nl.md) | [Indonesia](./README-id.md) | [ไทย](./README-th.md) | [Русский](./README-ru.md) | [Українська](./README-uk.md) | [Español](./README-es.md) | [Italiano](./README-it.md) | [日本語](./README-ja.md) | [Deutsch](./README-de.md) | [Türkçe](./README-tr.md) | [Tiếng Việt](./README-vi.md) | [Монгол](./README-mn.md) | [हिंदी](./README-hi.md) | [العربية](./README-ar.md) | [Polski](./README-pl.md) | [Македонски](./README-mk.md) | [ລາວ](./README-lo.md) | [Ελληνικά](./README-el.md)
 
-[English](./README.md) | [繁中版](./README-tw.md) | [简中版](./README-zh.md) | [Português (Brasil)](./README-pt_BR.md) | [Français](./README-fr.md) | [한국어](./README-ko.md) | [Nederlands](./README-nl.md) | [ไทย](./README-th.md) | [Русский](./README-ru.md) | [Українська](./README-uk.md) | [Español](./README-es.md) | [Italiano](./README-it.md) | [日本語](./README-ja.md) | [Deutsch](./README-de.md) | [Türkçe](./README-tr.md) | [Tiếng Việt](./README-vi.md) | [Монгол](./README-mn.md) | [हिंदी](./README-hi.md) | [العربية](./README-ar.md) | [Polski](./README-pl.md) | [Македонски](./README-mk.md) | [ລາວ](./README-lo.md)
-
-# Checklist Keamanan API
-Checklist penanggulangan keamanan yang paling penting ketika merancang, menguji, dan melepaskan API ke khalayak
+# API Security Checklist
+Checklist of the most important security countermeasures when designing, testing, and releasing your API.
 
 
 ---
 
-## Autentikasi
-- [ ] Jangan gunakan `Basic Auth`. Gunakan autentikasi baku (Contoh: JWT, Oauth).
-- [ ] Gunakan mekanisme baku untuk `autentikasi`, `pembuatan token`, dan `penyimpanan kata sandi`.
-- [ ] Gunakan maksimal percobaan berulang dan fitur penjara pada Login.
-- [ ] Gunakan enkripsi untuk seluruh data sensitif.
+## Authentication
+- [ ] Don't use `Basic Auth`. Use standard authentication instead (e.g. [JWT](https://jwt.io/), [OAuth](https://oauth.net/)).
+- [ ] Don't reinvent the wheel in `Authentication`, `token generation`, `password storage`. Use the standards.
+- [ ] Use `Max Retry` and jail features in Login.
+- [ ] Use encryption on all sensitive data.
 
 ### JWT (JSON Web Token)
-- [ ] Gunakan kunci acak yang rumit (`JWT Secret`) untuk membuat proses pemecahan token secara paksa menjadi sangat susah.
-- [ ] Jangan gunakan algoritma yang berasal dari muatan yang dikirim oleh pengguna. Paksa penggunaan algoritma di sisi peladen (`HS256` or `RS256`).
-- [ ] Gunakan masa tenggat token (`TTL`, `RTTL`) yang sesingkat mungkin.
-- [ ] Jangan simpan data sensitif pada muatan JWT karena muatan JWT dapat diterjemahkan [dengan mudah](https://jwt.io/#debugger-io).
+- [ ] Use a random complicated key (`JWT Secret`) to make brute forcing the token very hard.
+- [ ] Don't extract the algorithm from the header. Force the algorithm in the backend (`HS256` or `RS256`).
+- [ ] Make token expiration (`TTL`, `RTTL`) as short as possible.
+- [ ] Don't store sensitive data in the JWT payload, it can be decoded [easily](https://jwt.io/#debugger-io).
 
 ### OAuth
-- [ ] Selalu validasi `redirect_uri` di sisi peladen sehingga hanya URL-URL yang ada di dalam daftar putih yang boleh digunakan.
-- [ ] Selalu coba untuk mempertukarkan kode bukan token (jangan ijinkan `response_type=token`).
-- [ ] Gunakan parameter `state` dengan campuran nilai acak (_random hash_) untuk mencegah CSRF pada proses autentikasi.
-- [ ] Tetapkan cakupan baku dan validasi parameter cakupan untuk setiap aplikasi.
+- [ ] Always validate `redirect_uri` server-side to allow only whitelisted URLs.
+- [ ] Always try to exchange for code and not tokens (don't allow `response_type=token`).
+- [ ] Use `state` parameter with a random hash to prevent CSRF on the OAuth authentication process.
+- [ ] Define the default scope, and validate scope parameters for each application.
 
-## Akses
-- [ ] Batasi permintaan (_throttling_) di sisi peladen untuk menghindari serangan yang dapat melumpukan sistem (Contoh: DDoS, serangan paksa).
-- [ ] Gunakan HTTPS di sisi peladen untuk menghindari serangan pencegatan / MItM (Man In The Middle Attack).
-- [ ] Gunakan tajuk `HSTS` pada SSL untuk mencegah serangan SSL Strip.
+## Access
+- [ ] Limit requests (Throttling) to avoid DDoS / brute-force attacks.
+- [ ] Use HTTPS on server side to avoid MITM (Man in the Middle Attack).
+- [ ] Use `HSTS` header with SSL to avoid SSL Strip attack.
 
-## Masuk
-- [ ] Gunakan metode HTTP yang sesuai dengan operasi yang digunakan, `GET untuk membaca catatan`, `POST untuk membuat catatan baru`, `PUT/PATCH untuk mengganti secara keseluruhan/mengubah sebagian catatan`, `DELETE untuk menghapus catatan` dan tanggapan `405 Method Not Allowed` jika metode permintaan tidak dikenali pada sumber daya.
-- [ ] Validasi `content-type` pada tajuk _Accept_ pada permintaan (Negosiasi konten) sehingga hanya mengijinkan format yang dikenali (Contoh: `application/xml`, `application/json`, dan lain sebagainya). Berikan tanggapan `406 Not Acceptable` jika nilai tajuk _Accept_ tidak dikenali.
-- [ ] Validasi `content-type` dari data yang dipos oleh pengguna (Contoh: `application/x-www-form-urlencoded`, `multipart/form-data`, `application/json`, dan lain sebagainya).
-- [ ] Validasi masukan dari pengguna untuk menghindari kerentanan umum (Contoh: `XSS`, `SQL-Injection`, `Remote Code Execution`, dan lain sebagainya).
-- [ ] Jangan gunakan data sensitif seperti `kredensial`, `kata sandi`, `token keamanan`, atau `kunci API` pada URL. Gunakan tajuk _Authorization_ baku.
-- [ ] Gunakan layanan pintu gerbang API (_API Gateway_) untuk memungkinan singgahan, pembatasan laju, pendeteksian lalu lintas tinggi, dan penyebaran sumber daya API secara dinamis.
+## Input
+- [ ] Use the proper HTTP method according to the operation: `GET (read)`, `POST (create)`, `PUT/PATCH (replace/update)`, and `DELETE (to delete a record)`, and respond with `405 Method Not Allowed` if the requested method isn't appropriate for the requested resource.
+- [ ] Validate `content-type` on request Accept header (Content Negotiation) to allow only your supported format (e.g. `application/xml`, `application/json`, etc.) and respond with `406 Not Acceptable` response if not matched.
+- [ ] Validate `content-type` of posted data as you accept (e.g. `application/x-www-form-urlencoded`, `multipart/form-data`, `application/json`, etc.).
+- [ ] Validate user input to avoid common vulnerabilities (e.g. `XSS`, `SQL-Injection`, `Remote Code Execution`, etc.).
+- [ ] Don't use any sensitive data (`credentials`, `Passwords`, `security tokens`, or `API keys`) in the URL, but use standard Authorization header.
+- [ ] Use an API Gateway service to enable caching, Rate Limit policies (e.g. `Quota`, `Spike Arrest`, or `Concurrent Rate Limit`) and deploy APIs resources dynamically.
 
-## Pemrosesan
-- [ ] Cek apakah seluruh titik akhir terlindungi oleh autentikasi untuk menghindari proses autentikasi yang rusak.
-- [ ] Sumber daya ID kepunyaan pengguna sebaiknya dihindari. Lebih baik menggunakan`/me/orders` daripada `/user/654321/orders`.
-- [ ] Jangan gunakan ID yang bertambah secara otomatis. Sebaiknya gunakan `UUID`.
-- [ ] Jika hendak menguraikan berkas XML, pastikan penguraian entitas tidak diaktikan untuk menghindari serangan `XXE` (XML External Entity).
-- [ ] Jika hendak menguraikan berkas XML, pastikan perluasan entitas tidak diaktifkan untuk menghindari `Billion Laughs/XML bomb` melalui serangan perluasan entitas eksponensial.
-- [ ] Gunakan CDN untuk unggah berkas.
-- [ ] Jika berhubungan dengan jumlah data yang sangat besar, gunakan Pekerja dan Antrian untuk memproses sebanyak mungkin di balik layar dan kembalikan tanggapan cepat untuk menghindari pemblokiran HTTP.
-- [ ] Jangan lupa untuk mematikan mode DEBUG.
+## Processing
+- [ ] Check if all the endpoints are protected behind authentication to avoid broken authentication process.
+- [ ] User own resource ID should be avoided. Use `/me/orders` instead of `/user/654321/orders`.
+- [ ] Don't auto-increment IDs. Use `UUID` instead.
+- [ ] If you are parsing XML files, make sure entity parsing is not enabled to avoid `XXE` (XML external entity attack).
+- [ ] If you are parsing XML files, make sure entity expansion is not enabled to avoid `Billion Laughs/XML bomb` via exponential entity expansion attack.
+- [ ] Use a CDN for file uploads.
+- [ ] If you are dealing with huge amount of data, use Workers and Queues to process as much as possible in background and return response fast to avoid HTTP Blocking.
+- [ ] Do not forget to turn the DEBUG mode OFF.
 
-## Keluaran
-- [ ] Kirim tajuk `X-Content-Type-Options: nosniff`.
-- [ ] Kirim tajuk `X-Frame-Options: deny`.
-- [ ] Kirim tajuk `Content-Security-Policy: default-src 'none'`.
-- [ ] Hapus tajuk sidik jari - `X-Powered-By`, `Server`, `X-AspNet-Version` dan lain sebagainya.
-- [ ] Paksa `content-type` pada tanggapan. Jika mengambalikan `application/json` maka tajuk `content-type` adalah `application/json`.
-- [ ] Jangan kembalikan data sensitif seperti `kredensial`, `kata sandi`, dan `token keamanan`.
-- [ ] Kembalikan kode status yang layak sesuai dengan operasi yang diselesaikan (Contoh: `200 OK`, `400 Bad Request`, `401 Unauthorized`, `405 Method Not Allowed`, dan lain sebagainya).
+## Output
+- [ ] Send `X-Content-Type-Options: nosniff` header.
+- [ ] Send `X-Frame-Options: deny` header.
+- [ ] Send `Content-Security-Policy: default-src 'none'` header.
+- [ ] Remove fingerprinting headers - `X-Powered-By`, `Server`, `X-AspNet-Version`, etc.
+- [ ] Force `content-type` for your response. If you return `application/json`, then your `content-type` response is `application/json`.
+- [ ] Don't return sensitive data like `credentials`, `Passwords`, or `security tokens`.
+- [ ] Return the proper status code according to the operation completed. (e.g. `200 OK`, `400 Bad Request`, `401 Unauthorized`, `405 Method Not Allowed`, etc.).
 
 ## CI & CD
-- [ ] Audit rancangan dan pelaksanaan dengan pengujian unit/integrasi.
-- [ ] Gunakan proses ulasan kode dan kesampingkan persetujuan sendiri.
-- [ ] Pastikan seluruh komponen layanan dipindai secara statis menggunakan anti virus sebelum didorong ke lingkungan produksi, termasuk pustaka-pustaka milik vendor dan ketergantungan lainnya.
-- [ ] Rancang solusi kembali ke versi sebelumnya pada proses penyebaran.
+- [ ] Audit your design and implementation with unit/integration tests coverage.
+- [ ] Use a code review process and disregard self-approval.
+- [ ] Ensure that all components of your services are statically scanned by AV software before pushing to production, including vendor libraries and other dependencies.
+- [ ] Design a rollback solution for deployments.
 
 
+---
+
+## See also:
+- [yosriady/api-development-tools](https://github.com/yosriady/api-development-tools) - A collection of useful resources for building RESTful HTTP+JSON APIs.
+
+
+---
+
+# Contribution
+Feel free to contribute by forking this repository, making some changes, and submitting pull requests. For any questions drop us an email at `team@shieldfy.io`.
